@@ -7,7 +7,7 @@
     {
       "name": "scrapling",
       "source": {
-        "type": "github",
+        "source": "github",
         "repo": "saenidev/scrapling-skill"
       },
       "description": "Scrapling web scraping reference - fetcher selection, selectors, anti-bot bypass, and session management",
