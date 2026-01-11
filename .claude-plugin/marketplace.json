@@ -1,9 +1,15 @@
 {
   "name": "scrapling-skill",
+  "owner": {
+    "name": "saenidev"
+  },
   "plugins": [
     {
       "name": "scrapling",
-      "source": "..",
+      "source": {
+        "type": "github",
+        "repo": "saenidev/scrapling-skill"
+      },
       "description": "Scrapling web scraping reference - fetcher selection, selectors, anti-bot bypass, and session management",
       "version": "1.0.0"
     }
