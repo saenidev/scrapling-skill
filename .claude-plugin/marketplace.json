@@ -1,0 +1,11 @@
+{
+  "name": "scrapling-skill",
+  "plugins": [
+    {
+      "name": "scrapling",
+      "source": "..",
+      "description": "Scrapling web scraping reference - fetcher selection, selectors, anti-bot bypass, and session management",
+      "version": "1.0.0"
+    }
+  ]
+}
