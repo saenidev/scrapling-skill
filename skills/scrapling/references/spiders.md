@@ -121,14 +121,16 @@ spider.start()
 Process items as they arrive in real time:
 
 ```python
-import asyncio
+import anyio
 
 async def main():
     spider = MySpider()
     async for item in spider.stream():
         print(item)  # Items arrive as they're scraped
+        # Access real-time stats directly on the spider instance
+        print(f"Items so far: {spider.stats.items_scraped}")
 
-asyncio.run(main())
+anyio.run(main)  # NOT asyncio.run — Scrapling is built on anyio
 ```
 
 ---

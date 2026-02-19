@@ -122,11 +122,14 @@ page = Fetcher.get('https://example.com', proxy_rotator=rotator)
 ### Adaptive Selectors (Self-Healing)
 
 ```python
-from scrapling import Adaptor
+from scrapling import Selector
 
-# Elements auto-relocate when website changes
-adaptor = Adaptor(html, auto_match=True, storage='sqlite')
-products = adaptor.css('.product-card', adaptive=True)
+# Save element properties on first visit
+selector = Selector(html, url='https://example.com', adaptive=True, storage='sqlite')
+products = selector.css('.product-card', auto_save=True)
+
+# On subsequent runs, relocate even if structure changed
+products = selector.css('.product-card', adaptive=True)
 ```
 
 ## Element Selection
@@ -202,7 +205,7 @@ See [references/cli.md](references/cli.md) for all commands and options.
 from scrapling.fetchers import Fetcher
 
 try:
-    page = Fetcher.get('https://example.com', timeout=10000)
+    page = Fetcher.get('https://example.com', timeout=10)  # seconds
     element = page.css('.target').first
     if element:
         print(element.text)

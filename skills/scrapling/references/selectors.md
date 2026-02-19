@@ -105,12 +105,12 @@ relocated = page.relocate(element_dict)
 ### Storage Configuration
 
 ```python
-from scrapling import Adaptor
+from scrapling import Selector
 
-adaptor = Adaptor(
+adaptor = Selector(
     html,
     url='https://example.com',  # Required for domain-based storage
-    auto_match=True,
+    adaptive=True,
     storage='sqlite',
     storage_args={'path': './selectors.db'}
 )
