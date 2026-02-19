@@ -18,7 +18,7 @@ from scrapling.fetchers import Fetcher
 
 page = Fetcher.get('https://example.com')
 titles = page.css('.title::text')
-links = [a.get('href') for a in page.css('a.link')]
+links = page.css('a.link::attr(href)').getall()
 
 # Response metadata
 print(page.status, page.headers, page.cookies)
