@@ -164,10 +164,11 @@ See [references/selectors.md](references/selectors.md) for navigation and advanc
 el = page.css('.target').first
 el.parent                # Parent element
 el.children              # Child elements
-el.next_sibling          # Next sibling
+el.next                  # Next sibling
+el.previous              # Previous sibling
 el.siblings              # All siblings
 el.text                  # Inner text
-el.clean_text            # Whitespace-normalized text
+el.text.clean()          # Whitespace-normalized text
 el.attrib['href']        # Attribute access
 ```
 

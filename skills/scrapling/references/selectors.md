@@ -76,12 +76,14 @@ Find elements with matching structure:
 ```python
 element = page.css('.product-card').first
 
-# Find similar elements (same tag, depth, attributes pattern)
-similar = page.find_similar(
-    element,
-    similarity_threshold=0.8,  # 0.0-1.0 (default: 0.8)
-    ignore_attributes=['id'],  # Attributes to skip
-    match_text=False           # Include text in comparison
+# Find similar elements — called on the element itself, not the page
+similar = element.find_similar()
+
+# With options
+similar = element.find_similar(
+    similarity_threshold=0.2,  # 0.0-1.0 (default: 0.2 = 20% attribute similarity)
+    ignore_attributes=['id'],  # Attributes to skip (default: ('href', 'src'))
+    match_text=False           # Include text content in comparison
 )
 ```
 
@@ -130,16 +132,14 @@ element = page.css('.target').first
 # Navigation
 parent = element.parent
 children = element.children
-first_child = element.first_child
-last_child = element.last_child
+first_child = element.children.first   # children is a Selectors list
+last_child = element.children.last
 below_elements = element.below_elements  # All nested descendants
 
 # Siblings
-next_sib = element.next_sibling
-prev_sib = element.prev_sibling
 all_siblings = element.siblings
 
-# Adjacent elements
+# Adjacent elements (property names are next/previous, not next_sibling/prev_sibling)
 next_el = element.next
 prev_el = element.previous
 ```
@@ -147,8 +147,8 @@ prev_el = element.previous
 ### Traversal Methods
 
 ```python
-# Iterate ancestors
-for ancestor in element.iterancestors():
+# Iterate ancestors (iterancestors is a @property returning a Generator)
+for ancestor in element.iterancestors:
     print(ancestor.tag)
 
 # Find ancestor with predicate
@@ -175,12 +175,12 @@ element = page.css('.content').first
 text = element.text                    # Inner text
 text = element.get_all_text()          # Recursive text from all descendants
 
-# Cleaned text
-text = element.clean_text              # Whitespace normalized
+# Cleaned text (clean_text property doesn't exist — use TextHandler.clean())
+text = element.text.clean()            # Whitespace normalized
 
 # Raw HTML
-html = element.html_content
-pretty = element.prettify()            # Formatted HTML
+html = element.html_content            # @property
+pretty = element.prettify              # @property — returns TextHandler (formatted HTML)
 
 # TextHandler methods (string subclass)
 text = element.text
@@ -205,7 +205,7 @@ href = element.get('href', default='#')
 
 # All attributes (AttributesHandler - read-only dict)
 attrs = element.attrib
-attrs.json_string                      # Convert to JSON
+attrs.json_string                      # Serialize all attrs to JSON — returns bytes
 attrs.search_values('http')            # Find attrs containing value
 attrs.search_values('btn', partial=True)  # Partial match
 
@@ -274,13 +274,13 @@ Generate robust selectors for any element:
 ```python
 element = page.css('.product').first
 
-# Short selectors (optimized)
-css = element.generate_css_selector()
-xpath = element.generate_xpath_selector()
+# All four are @property — access without parentheses
+css = element.generate_css_selector
+xpath = element.generate_xpath_selector
 
 # Full path selectors (from root)
-full_css = element.generate_full_css_selector()
-full_xpath = element.generate_full_xpath_selector()
+full_css = element.generate_full_css_selector
+full_xpath = element.generate_full_xpath_selector
 ```
 
 ---
