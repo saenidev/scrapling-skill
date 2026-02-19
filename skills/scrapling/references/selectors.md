@@ -108,14 +108,18 @@ relocated = page.relocate(element_dict)
 
 ```python
 from scrapling import Selector
+from scrapling.core.storage import SQLiteStorageSystem
 
 adaptor = Selector(
     html,
-    url='https://example.com',  # Required for domain-based storage
+    url='https://example.com',         # Required for domain-based storage
     adaptive=True,
-    storage='sqlite',
-    storage_args={'path': './selectors.db'}
+    storage=SQLiteStorageSystem,        # Pass the class, not the string 'sqlite'
+    storage_args={'storage_file': './selectors.db'}  # Key is storage_file, not path
 )
+
+# Simplest approach — omit storage entirely, defaults to SQLite in the library directory
+adaptor = Selector(html, url='https://example.com', adaptive=True)
 ```
 
 See [adaptive.md](adaptive.md) for complete adaptive scraping guide.
@@ -199,9 +203,9 @@ text.sort()                            # Sort characters
 element = page.css('a.link').first
 
 # Get attributes
-href = element.attrib['href']
-href = element.get('href')
-href = element.get('href', default='#')
+href = element.attrib['href']          # Direct dict-style access (KeyError if missing)
+href = element.attrib.get('href')      # Safe access via AttributesHandler.get()
+href = element.attrib.get('href', '#') # With default (element.get() takes no args — use attrib.get())
 
 # All attributes (AttributesHandler - read-only dict)
 attrs = element.attrib

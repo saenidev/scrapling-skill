@@ -124,8 +124,8 @@ page = Fetcher.get('https://example.com', proxy_rotator=rotator)
 ```python
 from scrapling import Selector
 
-# Save element properties on first visit
-selector = Selector(html, url='https://example.com', adaptive=True, storage='sqlite')
+# Save element properties on first visit (storage defaults to SQLite)
+selector = Selector(html, url='https://example.com', adaptive=True)
 products = selector.css('.product-card', auto_save=True)
 
 # On subsequent runs, relocate even if structure changed

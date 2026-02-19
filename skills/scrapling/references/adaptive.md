@@ -69,25 +69,30 @@ relocated = page.relocate(element_dict)
 
 ```python
 from scrapling import Selector
+from scrapling.core.storage import SQLiteStorageSystem
 
 adaptor = Selector(
     html,
-    url='https://example.com',  # Required - used for domain separation
+    url='https://example.com',          # Required - used for domain separation
     adaptive=True,
-    storage='sqlite',           # Default
-    storage_args={'path': './selectors.db'}
+    storage=SQLiteStorageSystem,         # Pass the class, not the string 'sqlite'
+    storage_args={'storage_file': './selectors.db'}  # Key is storage_file, not path
 )
+
+# Simplest — omit storage to use default SQLite (stored in the library directory)
+adaptor = Selector(html, url='https://example.com', adaptive=True)
 ```
 
 ### Global Configuration
 
 ```python
 from scrapling.fetchers import Fetcher
+from scrapling.core.storage import SQLiteStorageSystem
 
 Fetcher.configure(
     adaptive=True,
-    storage='sqlite',
-    storage_args={'path': './my_storage.db'}
+    storage=SQLiteStorageSystem,
+    storage_args={'storage_file': './my_storage.db'}
 )
 ```
 
