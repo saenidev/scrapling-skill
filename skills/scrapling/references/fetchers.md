@@ -130,7 +130,6 @@ from scrapling.fetchers import DynamicSession
 # Tab pooling for concurrent fetches
 with DynamicSession(headless=True, max_pages=5) as session:
     page = session.fetch('https://example.com')
-    stats = session.get_pool_stats()  # total, busy, max pages
 ```
 
 ---
@@ -204,7 +203,6 @@ from scrapling.fetchers import StealthySession
 # Tab pooling for concurrent stealth fetches
 with StealthySession(headless=True, solve_cloudflare=True, max_pages=5) as session:
     page = session.fetch('https://protected-site.com')
-    stats = session.get_pool_stats()  # total, busy, max pages
 ```
 
 ---
@@ -251,14 +249,22 @@ rotator = ProxyRotator(["http://proxy1:8080", "http://proxy2:8080"], strategy=we
 
 ## Async Variants
 
-All fetchers have async equivalents:
+For HTTP, use `AsyncFetcher`. For browser fetchers, use the async session classes — there is no `AsyncDynamicFetcher` or `AsyncStealthyFetcher`.
 
 ```python
-from scrapling.fetchers import AsyncFetcher, AsyncStealthyFetcher
+from scrapling.fetchers import AsyncFetcher, AsyncDynamicSession, AsyncStealthySession
 
 async def scrape():
+    # HTTP
     page = await AsyncFetcher.get('https://example.com')
-    page = await AsyncStealthyFetcher.fetch('https://protected.com')
+
+    # JavaScript-rendered content
+    async with AsyncDynamicSession(headless=True) as session:
+        page = await session.fetch('https://spa-app.com')
+
+    # Cloudflare/anti-bot bypass
+    async with AsyncStealthySession(solve_cloudflare=True, headless=True) as session:
+        page = await session.fetch('https://protected.com')
 ```
 
 ---
