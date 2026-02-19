@@ -1,5 +1,7 @@
 # Scrapling Fetchers Reference
 
+> **v0.4:** `Response.body` is always `bytes`. Browser fetchers now auto-retry by default (`retries=3`, `retry_delay=1`). New: `blocked_domains`, `Response.meta`, `Response.follow()`, `ProxyRotator`.
+
 ## Global Configuration
 
 Configure parser settings globally for all fetchers:
@@ -21,8 +23,18 @@ page = Fetcher.get('https://example.com')
 page.status      # HTTP status code (200, 404, etc.)
 page.headers     # Response headers dict
 page.cookies     # Cookies dict
-page.body        # Raw response content
+page.body        # Raw response content (always bytes in v0.4+)
 page.history     # Redirect chain
+page.meta        # Metadata dict (includes proxy used, request metadata)
+```
+
+### Response.follow()
+
+Create a follow-up Request for use with the Spider framework:
+
+```python
+# Designed for spider-style chained navigation
+request = response.follow('/next-page', callback=self.parse_detail)
 ```
 
 ---
@@ -93,6 +105,9 @@ page = DynamicFetcher.fetch(
     locale='en-US',            # Browser locale
     timezone_id='America/New_York',  # Browser timezone
     timeout=30000,             # Timeout in ms (default: 30000)
+    retries=3,                 # Auto-retry on failure (default: 3)
+    retry_delay=1,             # Seconds between retries (default: 1)
+    blocked_domains=['ads.example.com', 'tracker.io'],  # Block domains (subdomains auto-matched)
     extra_headers={'X-Custom': 'value'},
     proxy='http://proxy:8080'
 )
@@ -124,7 +139,7 @@ with DynamicSession(headless=True, max_pages=5) as session:
 
 Maximum stealth using Camoufox (modified Firefox). Best for protected sites.
 
-**Built-in protections:** Cloudflare bypass, CDP/WebRTC leak prevention, headless detection patching, canvas fingerprint noise, Google referer spoofing.
+**Built-in protections:** Cloudflare bypass, CDP/WebRTC leak prevention, headless detection patching, canvas fingerprint noise, Google referer spoofing, autoplay blocking.
 
 ```python
 from scrapling.fetchers import StealthyFetcher
@@ -147,7 +162,8 @@ page = StealthyFetcher.fetch(
     os_randomize=True,         # Random OS fingerprint
     block_webrtc=True,         # Block WebRTC leaks
     google_search=True,        # Set Google as referrer (default: True)
-    disable_ads=True           # Install uBlock Origin
+    disable_ads=True,          # Install uBlock Origin
+    blocked_domains=['tracker.io']  # Block specific domains
 )
 ```
 
@@ -167,8 +183,11 @@ page = StealthyFetcher.fetch(
 | `disable_ads` | bool | Install uBlock Origin |
 | `block_images` | bool | Don't load images |
 | `disable_resources` | bool | Drop fonts/media/beacons (~25% faster) |
+| `blocked_domains` | list | Block requests to these domains (subdomains auto-matched) |
 | `proxy` | str/dict | Proxy server config |
 | `timeout` | int | Timeout in ms (default: 30000, use 60000+ for Cloudflare) |
+| `retries` | int | Auto-retry on failure (default: 3) |
+| `retry_delay` | int | Seconds between retries (default: 1) |
 | `network_idle` | bool | Wait for network to settle |
 | `wait` | int | Extra wait in milliseconds |
 | `wait_selector` | str | CSS selector to wait for |
@@ -186,6 +205,40 @@ from scrapling.fetchers import StealthySession
 with StealthySession(headless=True, solve_cloudflare=True, max_pages=5) as session:
     page = session.fetch('https://protected-site.com')
     stats = session.get_pool_stats()  # total, busy, max pages
+```
+
+---
+
+## Proxy Rotation
+
+Thread-safe proxy rotation across all fetchers and sessions.
+
+```python
+from scrapling import ProxyRotator
+
+# Basic rotation (round-robin by default)
+rotator = ProxyRotator([
+    "http://proxy1:8080",
+    "http://user:pass@proxy2:8080",
+    "socks5://proxy3:1080"
+])
+
+# Use with any fetcher
+page = Fetcher.get('https://example.com', proxy_rotator=rotator)
+page = DynamicFetcher.fetch('https://example.com', proxy_rotator=rotator)
+page = StealthyFetcher.fetch('https://example.com', proxy_rotator=rotator)
+
+# Per-request override (bypasses rotator for that call)
+page = Fetcher.get('https://example.com', proxy_rotator=rotator, proxy='http://specific:8080')
+```
+
+### Custom Rotation Strategy
+
+```python
+class MyRotator(ProxyRotator):
+    def get_proxy(self):
+        # Custom logic — e.g., weighted, sticky per domain, etc.
+        return self.proxies[my_selection_logic()]
 ```
 
 ---
@@ -214,3 +267,5 @@ async def scrape():
 | Cloudflare/anti-bot protection | `StealthyFetcher` |
 | High-volume, speed critical | `Fetcher` with `impersonate` |
 | Maximum stealth needed | `StealthyFetcher` with all stealth options |
+| Multiple proxy IPs | Any fetcher + `ProxyRotator` |
+| Multi-page crawl | `Spider` (see [spiders.md](spiders.md)) |

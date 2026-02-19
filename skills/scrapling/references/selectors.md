@@ -1,27 +1,39 @@
 # Scrapling Selectors & Navigation Reference
 
+> **v0.4:** `css_first()`/`xpath_first()` removed. Use `.css('.sel').first`, `.css('.sel')[0]`, or `.css('.sel').get()`. `css('::text')` and `css('::attr()')` now return `Selector` objects (tag `"#text"`), not `TextHandler`. `.first`/`.last` are safe — return `None` instead of raising `IndexError`.
+
 ## CSS Selectors
 
 ```python
-# Single element
-element = page.css_first('.product-title')
-
-# Multiple elements
+# Multiple elements → Selectors list
 elements = page.css('.product-card')
 
-# With pseudo-elements (Scrapy-style)
-texts = page.css('.title::text')           # Get text content
-attrs = page.css('a::attr(href)')          # Get attribute
+# Single element (safe — None if missing)
+element = page.css('.product-title').first
+element = page.css('.product-title').last
+
+# Index access
+element = page.css('.product-title')[0]
+
+# get() — first element as TextHandler (alias: extract_first)
+text = page.css('.title').get()
+
+# getall() — all elements as TextHandlers (alias: extract)
+texts = page.css('.title').getall()
+
+# With pseudo-elements (Scrapy-style) — return Selector objects
+selectors = page.css('.title::text')         # Text nodes as Selectors
+selectors = page.css('a::attr(href)')        # Attributes as Selectors
 ```
 
 ## XPath Selectors
 
 ```python
-# Single element
-element = page.xpath_first('//div[@class="content"]')
-
 # Multiple elements
 elements = page.xpath('//a[contains(@href, "product")]')
+
+# Single element (safe)
+element = page.xpath('//div[@class="content"]').first
 
 # Text extraction
 texts = page.xpath('//h1/text()')
@@ -62,7 +74,7 @@ element = page.find_by_regex(re.compile(r'\d+ items'))
 Find elements with matching structure:
 
 ```python
-element = page.css_first('.product-card')
+element = page.css('.product-card').first
 
 # Find similar elements (same tag, depth, attributes pattern)
 similar = page.find_similar(
@@ -79,10 +91,10 @@ Elements survive website changes via similarity matching:
 
 ```python
 # Save element properties on first visit
-element = page.css('#product-1', auto_save=True)
+element = page.css('#product-1', auto_save=True).first
 
 # Auto-relocate when website changes
-element = page.css('#product-1', adaptive=True)
+element = page.css('#product-1', adaptive=True).first
 
 # Manual save/retrieve/relocate
 page.save(element, 'my_product')
@@ -113,7 +125,7 @@ See [adaptive.md](adaptive.md) for complete adaptive scraping guide.
 ### Parent/Child/Sibling
 
 ```python
-element = page.css_first('.target')
+element = page.css('.target').first
 
 # Navigation
 parent = element.parent
@@ -149,7 +161,7 @@ path = element.path
 descendants = element.find_all('span')
 
 # Chaining
-result = page.css_first('.container').css('.item').css_first('.title')
+result = page.css('.container').first.css('.item').css('.title').first
 ```
 
 ---
@@ -157,7 +169,7 @@ result = page.css_first('.container').css('.item').css_first('.title')
 ## Text Extraction
 
 ```python
-element = page.css_first('.content')
+element = page.css('.content').first
 
 # Basic text (returns TextHandler - enhanced string)
 text = element.text                    # Inner text
@@ -184,7 +196,7 @@ text.sort()                            # Sort characters
 ## Attribute Access
 
 ```python
-element = page.css_first('a.link')
+element = page.css('a.link').first
 
 # Get attributes
 href = element.attrib['href']
@@ -211,9 +223,17 @@ When `.css()` or `.xpath()` returns multiple elements, they're wrapped in a `Sel
 # Selectors inherits from list with extra methods
 products = page.css('.product-card')
 
+# Safe first/last (None instead of IndexError)
+first = products.first
+last = products.last
+
 # List-like operations
 products.length                        # Count (JavaScript-style)
 len(products)                          # Count (Python-style)
+
+# get/getall
+first_text = products.get()            # First as TextHandler
+all_texts = products.getall()          # All as TextHandlers
 
 # Chain queries across all elements
 all_prices = products.css('.price')    # CSS on each element
@@ -234,9 +254,9 @@ first_match = products.search(lambda el: el.text == 'Featured')
 ```python
 # Iterate elements
 for product in page.css('.product-card'):
-    title = product.css_first('.title').text
-    price = product.css_first('.price').text
-    link = product.css_first('a').get('href')
+    title = product.css('.title').first.text
+    price = product.css('.price').first.text
+    link = product.css('a').first.get('href')
 
 # List comprehension
 prices = [el.text for el in page.css('.price')]
@@ -252,7 +272,7 @@ active = page.css('.item').filter(lambda el: el.has_class('active'))
 Generate robust selectors for any element:
 
 ```python
-element = page.css_first('.product')
+element = page.css('.product').first
 
 # Short selectors (optimized)
 css = element.generate_css_selector()
@@ -276,5 +296,5 @@ html = '<html><body><div class="content">Hello</div></body></html>'
 page = Selector(html)
 
 # Now use all selection methods
-content = page.css_first('.content').text
+content = page.css('.content').first.text
 ```
