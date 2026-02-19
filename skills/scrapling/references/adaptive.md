@@ -50,8 +50,8 @@ The selector string serves as the identifier for storage/retrieval. Both `auto_s
 For elements found via other methods:
 
 ```python
-# Find element any way you want
-element = page.find_by_text('Add to Cart', tag='button')
+# Find element any way you want (find_by_text has no tag= param)
+element = page.find_by_text('Add to Cart')
 
 # Manually save with custom identifier
 page.save(element, 'cart_button')

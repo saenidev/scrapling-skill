@@ -66,7 +66,7 @@ def extract_field(element, selector: str) -> Optional[str]:
         if match:
             sel, attr = match.groups()
             el = element.css(sel).first if sel else element
-            return el.get(attr) if el else None
+            return el.attrib.get(attr) if el else None
         return None
 
     el = element.css(selector).first
@@ -110,7 +110,7 @@ def scrape_page(url: str, item_selector: str, fields: dict, fetcher_type: str,
     if not elements and adaptive:
         first = page.css(item_selector).first
         if first:
-            elements = page.find_similar(first, similarity_threshold=0.7)
+            elements = first.find_similar(similarity_threshold=0.7)
             print(f"Using find_similar fallback, found {len(elements)} elements")
 
     items = []

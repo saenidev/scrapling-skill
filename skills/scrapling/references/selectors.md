@@ -262,7 +262,7 @@ first_match = products.search(lambda el: el.text == 'Featured')
 for product in page.css('.product-card'):
     title = product.css('.title').first.text
     price = product.css('.price').first.text
-    link = product.css('a').first.get('href')
+    link = product.css('a::attr(href)').get()
 
 # List comprehension
 prices = [el.text for el in page.css('.price')]
