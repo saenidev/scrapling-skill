@@ -214,13 +214,13 @@ with StealthySession(headless=True, solve_cloudflare=True, max_pages=5) as sessi
 Thread-safe proxy rotation across all fetchers and sessions.
 
 ```python
-from scrapling import ProxyRotator
+from scrapling.engines.toolbelt import ProxyRotator
 
-# Basic rotation (round-robin by default)
+# Basic rotation (cyclic by default)
 rotator = ProxyRotator([
     "http://proxy1:8080",
     "http://user:pass@proxy2:8080",
-    "socks5://proxy3:1080"
+    {"server": "http://proxy3:8080", "username": "user", "password": "pass"},  # Playwright-style dict
 ])
 
 # Use with any fetcher
@@ -234,11 +234,17 @@ page = Fetcher.get('https://example.com', proxy_rotator=rotator, proxy='http://s
 
 ### Custom Rotation Strategy
 
+Pass a callable `strategy=(proxies, current_index) -> (proxy, next_index)` to the constructor:
+
 ```python
-class MyRotator(ProxyRotator):
-    def get_proxy(self):
-        # Custom logic — e.g., weighted, sticky per domain, etc.
-        return self.proxies[my_selection_logic()]
+from scrapling.engines.toolbelt import ProxyRotator
+
+def weighted_rotation(proxies, current_index):
+    # Custom logic — pick proxy however you like, return (proxy, next_index)
+    chosen = proxies[current_index % len(proxies)]
+    return chosen, (current_index + 1) % len(proxies)
+
+rotator = ProxyRotator(["http://proxy1:8080", "http://proxy2:8080"], strategy=weighted_rotation)
 ```
 
 ---

@@ -113,7 +113,7 @@ See [references/spiders.md](references/spiders.md) for the full Spider framework
 ### Proxy Rotation
 
 ```python
-from scrapling import ProxyRotator
+from scrapling.engines.toolbelt import ProxyRotator
 
 rotator = ProxyRotator(["http://proxy1:8080", "http://proxy2:8080"])
 page = Fetcher.get('https://example.com', proxy_rotator=rotator)

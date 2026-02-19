@@ -28,12 +28,12 @@ def get_fetcher(fetcher_type: str, adaptive: bool = False):
     if fetcher_type == "stealth":
         from scrapling.fetchers import StealthyFetcher
         if adaptive:
-            StealthyFetcher.configure(adaptive=True)
+            StealthyFetcher.adaptive = True
         return StealthyFetcher
     elif fetcher_type == "dynamic":
         from scrapling.fetchers import DynamicFetcher
         if adaptive:
-            DynamicFetcher.configure(adaptive=True)
+            DynamicFetcher.adaptive = True
         return DynamicFetcher
     else:
         from scrapling.fetchers import Fetcher
@@ -58,18 +58,18 @@ def extract_field(element, selector: str) -> Optional[str]:
 
     if "::text" in selector:
         sel = selector.replace("::text", "")
-        el = element.css_first(sel) if sel else element
+        el = element.css(sel).first if sel else element
         return el.text.strip() if el else None
 
     if "::attr(" in selector:
         match = re.match(r"(.*)::attr\((\w+)\)", selector)
         if match:
             sel, attr = match.groups()
-            el = element.css_first(sel) if sel else element
+            el = element.css(sel).first if sel else element
             return el.get(attr) if el else None
         return None
 
-    el = element.css_first(selector)
+    el = element.css(selector).first
     return el.text.strip() if el else None
 
 
@@ -106,9 +106,9 @@ def scrape_page(url: str, item_selector: str, fields: dict, fetcher_type: str,
     # Try primary selector
     elements = page.css(item_selector, adaptive=adaptive)
 
-    # Fallback to find_similar if no results and we have a reference
+    # Fallback to find_similar if no results and we have a reference element
     if not elements and adaptive:
-        first = page.css_first(item_selector)
+        first = page.css(item_selector).first
         if first:
             elements = page.find_similar(first, similarity_threshold=0.7)
             print(f"Using find_similar fallback, found {len(elements)} elements")

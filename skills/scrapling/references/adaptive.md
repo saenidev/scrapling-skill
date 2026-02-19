@@ -30,15 +30,15 @@ When original selector fails and `adaptive=True` is enabled:
 ### CSS/XPath Selection
 
 ```python
-# First visit - save element properties
-element = page.css('#product-1', auto_save=True)
+# First visit - save element properties (returns Selectors list; use .first for single element)
+element = page.css('#product-1', auto_save=True).first
 
 # After website changes - auto-relocate
-element = page.css('#product-1', adaptive=True)
+element = page.css('#product-1', adaptive=True).first
 
 # XPath works the same way
-element = page.xpath('//div[@id="product"]', auto_save=True)
-element = page.xpath('//div[@id="product"]', adaptive=True)
+element = page.xpath('//div[@id="product"]', auto_save=True).first
+element = page.xpath('//div[@id="product"]', adaptive=True).first
 ```
 
 The selector string serves as the identifier for storage/retrieval.
