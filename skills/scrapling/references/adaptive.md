@@ -68,12 +68,12 @@ relocated = page.relocate(element_dict)
 ### Default SQLite
 
 ```python
-from scrapling import Adaptor
+from scrapling import Selector
 
-adaptor = Adaptor(
+adaptor = Selector(
     html,
     url='https://example.com',  # Required - used for domain separation
-    auto_match=True,
+    adaptive=True,
     storage='sqlite',           # Default
     storage_args={'path': './selectors.db'}
 )

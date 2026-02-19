@@ -42,14 +42,14 @@ MySpider().start()
 ```python
 async def parse(self, response: Response):
     # Yield scraped items
-    yield {"title": response.css('h1').get(), "url": response.url}
+    yield {"title": response.css('h1::text').get(), "url": response.url}
 
     # Follow links to a different callback
     for link in response.css('a.next-page::attr(href)').getall():
         yield response.follow(link, callback=self.parse_next)
 
 async def parse_next(self, response: Response):
-    yield {"data": response.css('.content').get()}
+    yield {"data": response.css('.content::text').get()}
 ```
 
 ---
@@ -78,7 +78,7 @@ Use `sid=` on `Request`/`response.follow()` to route to a specific session.
 
 ```python
 from scrapling.fetchers import FetcherSession, AsyncDynamicSession
-from scrapling.spiders import Spider, Response, Request
+from scrapling.spiders import Spider, Response
 
 class HybridSpider(Spider):
     name = "hybrid"
@@ -94,7 +94,7 @@ class HybridSpider(Spider):
             yield response.follow(link, sid='browser', callback=self.parse_product)
 
     async def parse_product(self, response: Response):
-        yield {"title": response.css('h1').get()}
+        yield {"title": response.css('h1::text').get()}
 
 HybridSpider().start()
 ```
@@ -147,7 +147,7 @@ class MySpider(Spider):
     async def is_blocked(self, response: Response) -> bool:
         # Default checks status codes in BLOCKED_CODES set
         # Override for custom detection:
-        return response.status == 403 or 'captcha' in response.css('body').get('', '').lower()
+        return response.status == 403 or 'captcha' in response.css('body').get('').lower()
 ```
 
 Default blocked codes: `{401, 403, 407, 429, 444, 500, 502, 503, 504}`
@@ -277,8 +277,8 @@ class ProductSpider(Spider):
 
     async def parse_product(self, response: Response):
         yield {
-            "title": response.css('h1').get(),
-            "price": response.css('.price').get(),
+            "title": response.css('h1::text').get(),
+            "price": response.css('.price::text').get(),
             "url": response.url,
         }
 
