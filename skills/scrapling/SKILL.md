@@ -150,8 +150,9 @@ page.xpath('//h1').first
 page.find('div', class_='content')
 page.find_all('a', attrs={'data-type': 'link'})
 
-# Text search
-page.find_by_text('Add to Cart', tag='button')
+# Text search (no tag= param — filter by tag separately if needed)
+page.find_by_text('Add to Cart')
+page.css('button').filter(lambda el: el.text == 'Add to Cart').first
 ```
 
 > **Note:** `.first` and `.last` are safe accessors — they return `None` instead of raising `IndexError`.

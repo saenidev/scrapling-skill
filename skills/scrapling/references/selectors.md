@@ -56,12 +56,14 @@ divs = page.find_all('div')
 ## Text Search
 
 ```python
-# Find by text content
+# Find by text content (no tag= param — find_by_text searches all elements)
 element = page.find_by_text('Add to Cart')
-element = page.find_by_text('Add to Cart', tag='button')
 
 # Partial match
 element = page.find_by_text('Cart', partial=True)
+
+# To restrict to a specific tag, filter after
+button = page.css('button').filter(lambda el: el.text == 'Add to Cart').first
 
 # Find by regex pattern
 import re
